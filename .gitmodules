@@ -1,0 +1,4 @@
+[submodule "gtk"]
+	path = gtk
+	url = https://gitlab.gnome.org/GNOME/gtk.git
+    ignore = dirty

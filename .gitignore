@@ -1,0 +1,7 @@
+/autoit-addon/build_x64
+/Dependencies_x64_Release
+/Dependencies_x64_Release.zip
+/gtk-autoit-bindings-v*.7z
+/gtk-windows-*
+/node_modules
+/*.sublime-workspace

@@ -1,0 +1,146 @@
+#include-once
+#include <File.au3>
+
+Global $_gtk_debug = 0
+
+Local $aOpenHooks[8]
+Local $aCloseHooks[8]
+Local $iOpenHook = 0
+Local $iCloseHook = 0
+
+@@INCLUDE_DECLARATIONS@@
+
+Func _Gtk_DebugMsg($msg)
+	If BitAND($_gtk_debug, 1) Then
+		ConsoleWrite($msg & @CRLF)
+	EndIf
+	If BitAND($_gtk_debug, 2) Then
+		DllCall("kernel32.dll", "none", "OutputDebugString", "str", $msg)
+	EndIf
+EndFunc   ;==>_Gtk_DebugMsg
+
+Func _Gtk_RegisterOpenHook($sCallback)
+	_Gtk_DebugMsg("Register Open Hook " & $sCallback)
+	If $iOpenHook == UBound($aOpenHooks) Then
+		ReDim $aOpenHooks[$iOpenHook * 2]
+	EndIf
+	$aOpenHooks[$iOpenHook] = $sCallback
+	$iOpenHook += 1
+EndFunc   ;==>_Gtk_RegisterOpenHook
+
+Func _Gtk_RegisterCloseHook($sCallback)
+	_Gtk_DebugMsg("Register Close Hook " & $sCallback)
+	If $iCloseHook == UBound($aCloseHooks) Then
+		ReDim $aCloseHooks[$iCloseHook * 2]
+	EndIf
+	$aCloseHooks[$iCloseHook] = $sCallback
+	$iCloseHook += 1
+EndFunc   ;==>_Gtk_RegisterCloseHook
+
+Func _Gtk_LoadDLL($dll)
+	_Gtk_DebugMsg('Loading ' & $dll)
+	Local $result = DllOpen($dll)
+	If $result == -1 Then
+		ConsoleWriteError('Error while loading ' & $dll & @CRLF)
+	EndIf
+	Return $result
+EndFunc   ;==>_Gtk_LoadDLL
+
+Func _Gtk_FindFile($sFile, $sDir = @ScriptDir, $sFilter = "")
+	_Gtk_DebugMsg("_Gtk_FindFile('" & $sFile & "', '" & $sDir & "', '" & $sFilter & "')")
+
+	Local $aFileList[2] = [1, "."]
+	Local $sFound = ""
+	Local $sDrive = "", $sFileName = "", $sExtension = ""
+
+	While 1
+		If $sFilter <> "" Then
+			$aFileList = _FileListToArray($sDir, $sFilter)
+			If @error <> 0 And @error <> 4 Then
+				ExitLoop
+			EndIf
+		EndIf
+
+		For $i = 1 To UBound($aFileList) - 1
+			If StringCompare($aFileList[$i], ".") == 0 Then
+				$sFound = $sDir & "\" & $sFile
+			Else
+				$sFound = $sDir & "\" & $aFileList[$i] & "\" & $sFile
+			EndIf
+
+			_Gtk_DebugMsg("Looking for " & $sFound & @CRLF)
+
+			If FileExists($sFound) Then
+				_Gtk_DebugMsg("Found " & $sFound & @CRLF)
+				ExitLoop 2
+			EndIf
+
+			$sFound = ""
+		Next
+
+		_PathSplit($sDir, $sDrive, $sDir, $sFileName, $sExtension)
+		If $sDir == "" Then
+			ExitLoop
+		EndIf
+		$sDir = $sDrive & StringLeft($sDir, StringLen($sDir) - 1)
+	WEnd
+
+	Return $sFound
+EndFunc   ;==>_Gtk_FindFile
+
+Func _Gtk_Open($s_gtk_bin = "")
+	If $s_gtk_bin <> "" And StringRight($s_gtk_bin, 1) <> "\" Then
+		$s_gtk_bin = $s_gtk_bin & "\"
+	EndIf
+
+	@@INCLUDE_OPEN@@
+
+	For $i = 0 To $iOpenHook - 1
+		Call($aOpenHooks[$i])
+	Next
+
+	Return True
+EndFunc   ;==>_Gtk_Open
+
+Func _Gtk_Close()
+	@@INCLUDE_CLOSE_HEADER@@
+
+	For $i = $iCloseHook - 1 To 0 Step -1
+		Call($aCloseHooks[$i])
+	Next
+
+	@@INCLUDE_CLOSE_FOOTER@@
+
+	Return True
+EndFunc   ;==>_Gtk_Close
+
+Func _Gtk_DllCallResult($_aResult, $sFunction, $error = @error)
+	_Gtk_DebugMsg("called " & $sFunction)
+	If $error Then
+		_gtkPrintDLLError($error, $sFunction)
+		Return -1
+	EndIf
+
+	Return $_aResult[0]
+EndFunc   ;==>_Gtk_DllCallResult
+
+Func _gtkPrintDLLError($error, $sFunction = "function")
+	Local $sMsg = ""
+
+	Switch $error
+		Case 1
+			$sMsg = $sFunction & ': unable to use the DLL file'
+		Case 2
+			$sMsg = $sFunction & ': unknown "return type'
+		Case 3
+			$sMsg = '"' & $sFunction & '" not found in the DLL file'
+		Case 4
+			$sMsg = $sFunction & ': bad number of parameters'
+		Case 5
+			$sMsg = $sFunction & ': bad number of parameters'
+		Case Else
+			$sMsg = $sFunction & ': bad parameter'
+	EndSwitch
+
+	ConsoleWriteError('Error - ' & $sMsg & @CRLF)
+EndFunc   ;==>_gtkPrintDLLError
