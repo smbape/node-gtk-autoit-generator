@@ -4,8 +4,8 @@
 
 ### Prerequisites
 
-  - Download and extract [gtk-autoit-bindings-v1.0.0-rc.0.7z](https://github.com/smbape/node-gtk-autoit-generator/releases/download/v1.0.0-rc.0-rc.0/gtk-autoit-bindings-v1.0.0-rc.0.7z) into a folder
-  - Download and extract [gtk-windows-4.3.2.7z](https://github.com/smbape/node-gtk-autoit-generator/releases/download/v1.0.0-rc.0-rc.0/gtk-windows-4.3.2.7z) into a folder
+  - Download and extract [gtk-autoit-bindings-v1.0.0-rc.0.7z](https://github.com/smbape/node-gtk-autoit-generator/releases/download/v1.0.0-rc.0/gtk-autoit-bindings-v1.0.0-rc.0.7z) into a folder
+  - Download and extract [gtk-windows-4.3.2.7z](https://github.com/smbape/node-gtk-autoit-generator/releases/download/v1.0.0-rc.0/gtk-windows-4.3.2.7z) into a folder
 
 ### Example
 
