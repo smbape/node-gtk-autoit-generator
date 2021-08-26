@@ -451,7 +451,7 @@ waterfall([
 
         ${ Object.keys(options.fns).map(name => {
             return `$oDllFuncDict.Add("${ name }", "${ options.exported[name] }")`;
-        }).join("\n" + " ".repeat(8)).trim() }
+        }).join(`\n${ " ".repeat(8) }`).trim() }
 
         Func _gtk_callback($name, $sRetrunType = "none:cdecl", $sParams = "ptr;ptr")
             Local $hHandle

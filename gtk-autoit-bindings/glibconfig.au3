@@ -1,5 +1,7 @@
 #include-once
 
+EnvSet("GSK_RENDERER", "cairo")
+
 Global Const $GLIB_SYSDEF_AF_UNIX = 1
 Global Const $GLIB_SYSDEF_AF_INET = 2
 Global Const $GLIB_SYSDEF_AF_INET6 = 23

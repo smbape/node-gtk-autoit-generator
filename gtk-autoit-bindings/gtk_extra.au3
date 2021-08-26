@@ -91,3 +91,17 @@ Func _Gtk_RemoveRef($v_value)
 
 	Return True
 EndFunc   ;==>_Gtk_RemoveRef
+
+Func _Gtk_String($src)
+	Local $sSrcDllType
+	If IsDllStruct($src) Then
+		$sSrcDllType = "struct*"
+	Else
+		$sSrcDllType = "ptr"
+	EndIf
+
+	Local $strlen = _Gtk_DllCallResult(DllCall("msvcrt.dll", "int:cdecl", "strlen", $sSrcDllType, $src), "strlen", @error)
+	Local $tStr = DllStructCreate("char value[" & $strlen & "]", $src)
+
+	return $tStr.value
+EndFunc   ;==>_Gtk_String
